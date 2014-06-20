@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <ostream>
 
 template<typename T, size_t N, size_t M>
 class matrix
@@ -65,7 +66,7 @@ public:
 };
 
 template <typename T, size_t N, size_t M, size_t L>
-inline matrix<T, N, M> operator*(const matrix<T, N, L> &a, matrix<T, L, M> &b)
+inline matrix<T, N, M> operator*(const matrix<T, N, L> &a, const matrix<T, L, M> &b)
 {
     // a.cols() == b.rows()
     // c.rows() == a.rows()
@@ -87,7 +88,7 @@ inline matrix<T, N, M> operator*(const matrix<T, N, L> &a, matrix<T, L, M> &b)
 }
 
 template <typename T, size_t N, size_t M>
-inline matrix<T, N, M> operator+(const matrix<T, N, M> &a, matrix<T, N, M> &b)
+inline matrix<T, N, M> operator+(const matrix<T, N, M> &a, const matrix<T, N, M> &b)
 {
     matrix<T, N, M> c;
     for (size_t i = 0; i < c.rows(); ++i)
@@ -101,7 +102,7 @@ inline matrix<T, N, M> operator+(const matrix<T, N, M> &a, matrix<T, N, M> &b)
 }
 
 template <typename T, size_t N, size_t M>
-inline matrix<T, N, M> operator-(const matrix<T, N, M> &a, matrix<T, N, M> &b)
+inline matrix<T, N, M> operator-(const matrix<T, N, M> &a, const matrix<T, N, M> &b)
 {
     matrix<T, N, M> c;
     for (size_t i = 0; i < c.rows(); ++i)
@@ -112,4 +113,19 @@ inline matrix<T, N, M> operator-(const matrix<T, N, M> &a, matrix<T, N, M> &b)
         }
     }
     return c;
+}
+
+template <typename T, size_t N, size_t M>
+inline std::ostream &operator<<(std::ostream &os, const matrix<T, N, M> &m)
+{
+    os << "[" << m(0,0);
+    for (size_t j = 1; j < M; ++j)
+        os << ", " << m(0,j);
+    for (size_t i = 1; i < N; ++i)
+    {
+        os << ';' << std::endl << ' ' << m(i,0);
+        for (size_t j = 1; j < M; ++j)
+            os << ", " << m(i,j);
+    }
+    os << "]" << std::endl;
 }
