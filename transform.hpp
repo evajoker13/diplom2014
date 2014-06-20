@@ -1,5 +1,6 @@
 #pragma once
 
+#include "vec.hpp"
 #include "matrix.hpp"
 #include <array>
 #include <algorithm>
@@ -81,6 +82,19 @@ public:
         avec(N, 0) = 1;
         avec = tm * avec;
         matrix<T, N, 1> res;
+        copy(begin(avec), end(avec)-1, begin(res));
+        return res;
+    }
+
+    vec<T, N> apply(const vec<T, N>  &v, bool direct = true) const
+    {
+        using namespace std;
+        auto &tm = direct ? m : im;
+        matrix<T, N+1, 1> avec;
+        copy(begin(v), std::end(v), std::begin(avec));
+        avec(N, 0) = 1;
+        avec = tm * avec;
+        vec<T, N> res;
         copy(begin(avec), end(avec)-1, begin(res));
         return res;
     }
