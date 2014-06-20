@@ -19,8 +19,8 @@ int main()
     vec(0,0) = 1;
     vec(1,0) = 2;
     cout << "[" << vec(0,0) << ", " << vec(1,0) << "]" << endl;
-    transform<double, 2> tf = tf.translate({ -1, -3 });
-    //transform<double, 2> tf = tf.identity();
+    tmatrix<double, 2> tf = tf.translate({ -1, -3 });
+    //tmatrix<double, 2> tf = tf.identity();
     vec = tf.apply(vec);
     cout << "[" << vec(0,0) << ", " << vec(1,0) << "]" << endl;
 

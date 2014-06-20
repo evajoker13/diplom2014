@@ -78,7 +78,7 @@ void classificator::train(const psamples_type &a, const psamples_type &b)
         {
             // TODO: ellipsis aa, ab, ba, bb
             auto points = zip(begin(aa[t]), end(aa[t]), begin(aa[s]));
-            auto tf = transform<double>::translate({1, 1});
+            auto tf = tmatrix<double>::translate({1, 1});
         }
     }
 }

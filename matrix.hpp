@@ -10,6 +10,13 @@ class matrix
 public:
     constexpr matrix() {}
 
+    static matrix from_elems(const std::array<T, N*M> &elems)
+    {
+        matrix m;
+        m._elems = elems;
+        return m;
+    }
+
     constexpr size_t cols() const
     { return M; }
 
@@ -27,6 +34,15 @@ public:
     void fill(const T &x)
     { _elems.fill(x); }
 
+    constexpr const T *data() { return _elems.data(); }
+    T *data() { return _elems.data(); }
+
+    constexpr const T *begin() { return data(); }
+    T *begin() { return data(); }
+
+    constexpr const T *end() { return data() + N*M; }
+    T *end() { return data() + N*M; }
+
     class row
     {
         matrix &_matrix;
@@ -40,9 +56,9 @@ public:
         typedef T* iterator;
 
         constexpr iterator begin()
-        { return _matrix.data() + (_m*_matrix.cols()); }
+        { return _matrix.data() + (_m*M); }
         constexpr iterator end()
-        { return _matrix.data() + ((_m+1)*_matrix.cols()); }
+        { return _matrix.data() + ((_m+1)*M); }
 
         row &operator++ () { ++_m; }
     };
