@@ -2,7 +2,6 @@
 
 #include "matrix.hpp"
 #include <array>
-#include <cmath>
 #include <algorithm>
 
 template <typename T, size_t N = 2>
@@ -10,10 +9,10 @@ class tmatrix
 {
     // matrix for left multiplication (direct and inverse)
     matrix<T, N+1, N+1> m, im;
-    constexpr tmatrix() {}
 
 public:
-    static tmatrix scale(const array<T, N> &factors)
+    constexpr const decltype(m) &as_matrix() { return m; }
+    static tmatrix scale(const std::array<T, N> &factors)
     {
         tmatrix tf;
         tf.m.fill(0);
@@ -44,7 +43,7 @@ public:
         return tf;
     }
 
-    static tmatrix translate(const array<T, N> &offset)
+    static tmatrix translate(const std::array<T, N> &offset)
     {
         tmatrix tf = identity();
         for (size_t i = 0; i < N; ++i)
@@ -75,6 +74,7 @@ public:
 
     matrix<T, N, 1> apply(const matrix<T, N, 1>  &vec, bool direct = true)
     {
+        using namespace std;
         auto &tm = direct ? m : im;
         matrix<T, N+1, 1> avec;
         copy(begin(vec), end(vec), begin(avec));
@@ -85,7 +85,7 @@ public:
         return res;
     }
 
-    tmatrix apply(const tmatrix  &tm, bool direct = true)
+    tmatrix apply(const tmatrix &tm, bool direct = true) const
     {
         tmatrix res;
         if (direct)
