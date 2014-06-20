@@ -2,13 +2,27 @@
 #include <algorithm>
 #include <cassert>
 
+using namespace std;
+
+// p (m + g^2) = h_{i,j} + 0.5 g^2 +/- sqrt(h_{i,j} (1 - h_{i,j}) m + 0.25 g^2)
+std::array<double,2> p_interval(double h, size_t m)
+{
+    static constexpr double G  = 3;
+    static constexpr double G2 = G * G;
+
+    // conf. interval
+    double middle = h * m + G2 / 2;
+    double spread = G * sqrt(h * (1 - h) * m + G2 / 4);
+    double norm   = m + G2;
+
+    return { (middle - spread) / norm,
+             (middle + spread) / norm };
+}
+
 double p_statistics(const vector<double> &x, const vector<double> &y)
 {
     assert(std::is_sorted(x.begin(), x.end()));
     assert(std::is_sorted(y.begin(), y.end()));
-
-    static constexpr double G  = 3;
-    static constexpr double G2 = G * G;
 
     const size_t n = x.size();
     const size_t N = n * (n - 1) / 2;
@@ -76,14 +90,10 @@ double p_statistics(const vector<double> &x, const vector<double> &y)
             double pA = double(j - i) / (n + 1);
 
             // conf. interval
-            double middle = n * h + G2 / 2;
-            double spread = G * sqrt(h * (1 - h) * n + G2 / 4);
-            double norm   = n + G2;
-            double p1     = (middle - spread) / norm,
-                   p2     = (middle + spread) / norm;
+            auto p = p_interval(h, n);
 
             // check interval
-            if (p1 <= pA && pA <= p2)
+            if (p[0] <= pA && pA <= p[1])
             {
                 ++L;
             }
