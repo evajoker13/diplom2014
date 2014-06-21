@@ -6,6 +6,7 @@
 #include <functional>
 #include <vector>
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <cstdlib>
 #include <cmath>
@@ -13,57 +14,48 @@
 
 using namespace std;
 
+ostream &operator<<(ostream &os, const vector<classificator::result> &results)
+{
+    auto prec = os.precision(5);
+    auto flags = os.flags();
+    os.flags(flags | os.fixed);
+    os << setw(12) << "CMG" << ' '
+       << setw(12) << "FAM" << ' '
+       << setw(12) << "TCMG" << ' '
+       << setw(12) << "TFAM" << endl;
+
+    for (const auto &result : results)
+    {
+        auto decision =
+            (result.tcmg > result.tfam) ? "CMG" :
+            (result.tcmg < result.tfam) ? "FAM" : "";
+        os << setw(12) << result.cmg << ' '
+           << setw(12) << result.fam << ' '
+           << setw(12) << result.tcmg << ' '
+           << setw(12) << result.tfam << "   "
+           << decision
+           << endl;
+    }
+
+    os.flags(flags);
+    os.precision(prec);
+}
+
 int main()
 {
-    matrix<double, 2, 1> vec;
-    vec(0,0) = 1;
-    vec(1,0) = 2;
-    cout << "[" << vec(0,0) << ", " << vec(1,0) << "]" << endl;
-    tmatrix<double, 2> tf = tf.translate({ -1, -3 });
-    //tmatrix<double, 2> tf = tf.identity();
-    vec = tf.apply(vec);
-    cout << "[" << vec(0,0) << ", " << vec(1,0) << "]" << endl;
-
     ifstream a_file("a.pok"), b_file("b.pok");
     group_type a_group, b_group;
     load_group(a_group, a_file);
     load_group(b_group, b_file);
 
-    // check groups
-    group_type c_group, d_group;
-    c_group.emplace_back(std::move(a_group.back()));
-    a_group.pop_back();
-    d_group.emplace_back(std::move(b_group.back()));
-    b_group.pop_back();
-
     psamples_type a = toPSamples(a_group), b = toPSamples(b_group);
     classificator cf;
     cf.train(a, b);
-    return 0;
 
-    for (size_t i = 0; i < tuple_size<properties_type>::value; ++i)
-    {
-        cout << "Property #" << i << endl;
-        for (size_t j = 0; j < a.size(); ++j)
-        {
-            double p = 0;
-            for (size_t k = 0; k < a.size(); ++k)
-            {
-                if (j == k )
-                    continue; // skip same
-                p += a[j][i].distance(a[k][i]);
-            }
-            p /= a.size() - 1;
-            double np = 0;
-            for (size_t k = 0; k < b.size(); ++k)
-            {
-                np += a[j][i].distance(b[k][i]);
-            }
-            np /= b.size();
-            cout << j << ": p = " << p << ", np = " << np << endl;;
-        }
-    }
-
+    // check groups
+    ifstream c_file("c.pok");
+    group_type c_group;
+    load_group(c_group, c_file);
+    cout << cf.classify(toPSamples(c_group));
     return 0;
 }
-
