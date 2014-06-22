@@ -3,6 +3,7 @@
 #include "transform.hpp"
 #include <array>
 #include <cassert>
+#include <iostream>
 
 // find indexes of two most distant points
 template <typename T = double, size_t N>
@@ -47,11 +48,19 @@ public:
     //         "Pattern recognition with help of quadratic discriminant functions"
     static ellipse from_points(const std::vector<vec<T,2> > &points)
     {
+        constexpr double epsilon = 1e-5;
         ellipse e;
         auto &tm = e.tm;
 
         // 1. find diameter
         auto d = diam(points);
+        if (d[0] == d[1]) // only one point?
+        {
+            // just give a small circle
+            tm = tm.translate({-points[d[0]][0], -points[d[0]][1]});
+            tm = tm.scale(1/epsilon).apply(tm);
+            return e;
+        }
         // order points by x coordinate
         if (points[d[0]][0] > points[d[1]][1])
             std::swap(d[0], d[1]);
@@ -88,7 +97,10 @@ public:
         tm = tm.translate({ -(left + right)/2, -(bottom + top)/2 }).apply(tm);
 
         // 5. turn rectangle into square
-        auto aspect_ratio = (right - left) / (top - bottom);
+        auto width = right - left, height = top - bottom;
+        if (width < epsilon) width = epsilon;
+        if (height < epsilon) height = epsilon;
+        auto aspect_ratio = width / height;
         tm = tm.scale({ 1, aspect_ratio }).apply(tm);
 
         // 6. find minimal radius of enclosing circle with center of square
@@ -99,6 +111,7 @@ public:
             if (dist > radius)
                 radius = dist;
         }
+        if (radius < epsilon) radius = epsilon;
 
         // 7. scale our space to make that circle of radius 1.0
         tm = tm.scale(1.0/radius).apply(tm);

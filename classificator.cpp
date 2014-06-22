@@ -3,6 +3,7 @@
 #include "ellipse.hpp"
 #include <vector>
 #include <array>
+#include <iostream>
 
 using namespace std;
 
@@ -100,6 +101,7 @@ struct patient_distance
             }
             qa[k] = p / n;
             qb[k] = d / m;
+            // cout << qa[k] << ", " << qb[k] << endl;
         }
     }
 };
@@ -123,13 +125,6 @@ struct ellipses
         }
     }
 
-    struct cmatch {
-        bool c1 : 1; // cmg = a3 || a4
-        bool c2 : 1; // fam = a4 || a3*
-        bool c3 : 1; // tcmg = a1 || a2*
-        bool c4 : 1; // tfam = a2 || a1*
-    };
-
     struct amatch {
         // qa
         bool a1 : 1; // aa
@@ -142,6 +137,7 @@ struct ellipses
         bool a3_ : 1; // bb - ba
         bool a4_ : 1; // ba - bb
 
+        /*
         operator cmatch() const
         {
             return {
@@ -149,6 +145,27 @@ struct ellipses
                 a4 || a3_,
                 a1 || a2_,
                 a2 || a1_
+            };
+        }
+        */
+    };
+
+    struct cmatch {
+        /*
+        bool c1 : 1; // cmg = a3 || a4
+        bool c2 : 1; // fam = a4 || a3*
+        bool c3 : 1; // tcmg = a1 || a2*
+        bool c4 : 1; // tfam = a2 || a1*
+        */
+
+        std::array<bool, 6> c;
+        cmatch(const amatch &a)
+        {
+            c = {
+                a.a3 || a.a4,
+                a.a4 || a.a3_,
+                a.a1 || a.a2_,
+                a.a2 || a.a1_,
             };
         }
     };
@@ -173,7 +190,7 @@ struct ellipses
         }
     };
 
-    cmatch check(const patient_distance &pd, size_t t, size_t s) const
+    ematch check(const patient_distance &pd, size_t t, size_t s) const
     {
         vec<double,2> va = { pd.qa[t], pd.qa[s] };
         vec<double,2> vb = { pd.qb[t], pd.qb[s] };
@@ -192,11 +209,11 @@ struct ellipses
         {
             for (size_t s = t+1; s < chars_count; ++s)
             {
-                cmatch c = check(pd, t, s);
-                if (c.c1) ++res.cmg;
-                if (c.c2) ++res.fam;
-                if (c.c3) ++res.tcmg;
-                if (c.c4) ++res.tfam;
+                cmatch c = amatch(check(pd, t, s));
+                if (c.c[0]) ++res.cmg;
+                if (c.c[1]) ++res.fam;
+                if (c.c[2]) ++res.tcmg;
+                if (c.c[3]) ++res.tfam;
             }
         }
         constexpr size_t m = chars_count * chars_count;
@@ -219,7 +236,7 @@ void classificator::train(const psamples_type &a, const psamples_type &b)
 
     ellipses stage3(stage2);
 
-    classifier = [=](const properties_type &q) {
+    classifier = [=](const properties_type &q) -> result {
         return stage3.freq(patient_distance(q, a, b));
     };
 }

@@ -22,6 +22,7 @@ public:
             tf.m(i, i)  = factors[i];
             tf.im(i, i) = 1/factors[i];
         }
+        tf.m(N,N) = 1; // augement
         return tf;
     }
 
@@ -35,6 +36,7 @@ public:
             tf.m(i, i)  = factor;
             tf.im(i, i) = ifactor;
         }
+        tf.m(N,N) = 1; // augement
         return tf;
     }
 
